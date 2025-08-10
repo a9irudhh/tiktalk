@@ -5,15 +5,19 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch src --exec node src/index.js"
+    "dev": "nodemon --watch src --exec node src/index.js",
+    "start": "node src/index.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.21.2",
     "mongoose": "^8.17.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   }
 }
