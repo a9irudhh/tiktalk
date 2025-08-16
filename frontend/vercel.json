@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/build",
-  "installCommand": "cd frontend && npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "outputDirectory": "/build",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "create-react-app",
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/public/index.html"
     }
   ]
 }
