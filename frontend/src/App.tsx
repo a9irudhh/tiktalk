@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import io, { Socket } from 'socket.io-client'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
@@ -38,11 +38,11 @@ function App() {
   }, [messages])
 
   const connectSocket = () => {
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000'
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
     const newSocket = io(backendUrl)
     setSocket(newSocket)
 
-    newSocket.on('joinConfirmed', (data) => {
+    newSocket.on('joinConfirmed', () => {
       setCurrentPage('chat')
       setError('')
     })
@@ -138,10 +138,6 @@ function App() {
     setError('')
     setShowParticipants(false)
     setShowLeaveDialog(false)
-  }
-
-  const handleLeaveRequest = () => {
-    setShowLeaveDialog(true)
   }
 
   const copyRoomNumber = () => {
