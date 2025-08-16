@@ -14,9 +14,16 @@ const server = createServer(app);
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const PORT = process.env.PORT || 8000;
 
+// Allow multiple origins for development and production
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    FRONTEND_URL
+].filter(Boolean);
+
 const io = new Server(server, {
     cors: {
-        origin: FRONTEND_URL,
+        origin: allowedOrigins,
         methods: ["GET", "POST"],
         allowedHeaders: ["*"],
         credentials: true
@@ -25,7 +32,7 @@ const io = new Server(server, {
 
 // Enable CORS and JSON parsing
 app.use(cors({
-    origin: FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json());
