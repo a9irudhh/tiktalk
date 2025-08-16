@@ -10,12 +10,24 @@ dotenv.config({
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
 
-const PORT = process.env.PORT || 8000
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const PORT = process.env.PORT || 8000;
+
+const io = new Server(server, {
+    cors: {
+        origin: FRONTEND_URL,
+        methods: ["GET", "POST"],
+        allowedHeaders: ["*"],
+        credentials: true
+    }
+});
 
 // Enable CORS and JSON parsing
-app.use(cors());
+app.use(cors({
+    origin: FRONTEND_URL,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -23,7 +35,7 @@ let allSockets = [];
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+    // console.log('A user connected:', socket.id);
 
     socket.on('join', (data) => {
         try {
@@ -36,7 +48,7 @@ io.on('connection', (socket) => {
             
             if (existingUser) {
                 socket.emit('error', { message: 'You are already in the room with this name' });
-                console.log(`${trimmedName} attempted to join room ${room} but name already exists`);
+                // console.log(`${trimmedName} attempted to join room ${room} but name already exists`);
                 return;
             }
             
@@ -48,7 +60,7 @@ io.on('connection', (socket) => {
                 name: trimmedName
             });
 
-            console.log(`${trimmedName} joined room ${room}`);
+            // console.log(`${trimmedName} joined room ${room}`);
             const roomParticipants = allSockets
                 .filter(user => user.room === room)
                 .map(user => user.name);
@@ -80,7 +92,7 @@ io.on('connection', (socket) => {
                 timestamp: new Date().toISOString()
             });
 
-            console.log(`Message from ${name} in room ${room}: ${message}`);
+            // console.log(`Message from ${name} in room ${room}: ${message}`);
         } catch (error) {
             console.log('Error in chat event:', error);
             socket.emit('error', { message: 'Failed to send message' });
@@ -101,7 +113,7 @@ io.on('connection', (socket) => {
                 .map(user => user.name);
 
             io.to(room).emit('participants', roomParticipants);
-            console.log(`${name} left room ${room}`);
+            // console.log(`${name} left room ${room}`);
 
         } catch (error) {
             console.log('Error in exit event:', error);
@@ -118,9 +130,26 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('typing', (data) => {
+        try {
+            const { room, name, typing } = data;
+            const userInfo = allSockets.find(user => user.socketId === socket.id);
+            
+            if (!userInfo) {
+                return;
+            }
+
+            // Broadcast typing status to all users in the room except sender
+            socket.to(room).emit('typing', { name, typing });
+            
+        } catch (error) {
+            console.log('Error in typing event:', error);
+        }
+    });
+
     socket.on('disconnect', () => {
         try {
-            console.log('User disconnected:', socket.id);
+            // console.log('User disconnected:', socket.id);
             
             // Find the user that disconnected
             const disconnectedUser = allSockets.find(user => user.socketId === socket.id);
@@ -134,7 +163,7 @@ io.on('connection', (socket) => {
                     .map(user => user.name);
                 io.to(room).emit('participants', roomParticipants);
 
-                console.log(`${name} disconnected from room ${room}`);
+                // console.log(`${name} disconnected from room ${room}`);
             }
         } catch (error) {
             console.log('Error in disconnect event:', error);
@@ -150,6 +179,4 @@ app.get('/', (req, res) => {
 // Start server without MongoDB for now
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-    console.log(`Socket.IO server is ready for connections`);
-    console.log(`Open http://localhost:${PORT} to access the chat interface`);
 });

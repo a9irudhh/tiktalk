@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 214 100% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 214 50% 97%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 214 100% 98%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 214 32% 94%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 214 32% 91%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 31.8% 88%;
+    --input: 214 31.8% 91%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer components {
+  /* Mobile viewport fixes */
+  .mobile-chat-container {
+    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile */
+    overflow: hidden;
+  }
+
+  /* Fixed chat input on mobile */
+  .mobile-chat-layout {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .mobile-chat-messages {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+  
+  .mobile-chat-input {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Custom word wrapping for chat messages */
+  .message-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  /* Message bubble tails */
+  .message-bubble-left {
+    position: relative;
+  }
+
+  .message-bubble-left::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 12px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid hsl(var(--muted));
+  }
+
+  .message-bubble-right {
+    position: relative;
+  }
+
+  .message-bubble-right::before {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 12px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid hsl(var(--primary));
+  }
+
+  /* Dark mode support for message tails */
+  .dark .message-bubble-left::before {
+    border-right-color: hsl(var(--muted));
+  }
+
+  .dark .message-bubble-right::before {
+    border-left-color: hsl(var(--primary));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* Typing indicator animation */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.typing-dot {
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+  border-radius: 50%;
+  animation: pulse-dot 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+/* Message animations */
+.message-enter {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-chat {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
