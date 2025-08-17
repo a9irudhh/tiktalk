@@ -11,19 +11,36 @@ dotenv.config({
 const app = express();
 const server = createServer(app);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://tiktalk-gamma.vercel.app/';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://tiktalk-gamma.vercel.app';
 const PORT = process.env.PORT || 8000;
 
 // Allow multiple origins for development and production
 const allowedOrigins = [
     'http://localhost:3000',
+    'http://localhost:3001',
     'http://127.0.0.1:3000',
-    FRONTEND_URL
-].filter(Boolean);
+    'http://127.0.0.1:3001',
+    'https://tiktalk-gamma.vercel.app',
+    'https://tiktalk-gamma.vercel.app/',
+    FRONTEND_URL,
+    FRONTEND_URL.endsWith('/') ? FRONTEND_URL.slice(0, -1) : FRONTEND_URL + '/'
+].filter((origin, index, self) => origin && self.indexOf(origin) === index);
+
+console.log('Allowed CORS origins:', allowedOrigins);
 
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            } else {
+                console.log('CORS blocked origin:', origin);
+                return callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods: ["GET", "POST"],
         allowedHeaders: ["*"],
         credentials: true
@@ -32,8 +49,20 @@ const io = new Server(server, {
 
 // Enable CORS and JSON parsing
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        } else {
+            console.log('Express CORS blocked origin:', origin);
+            return callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(express.static('public'));
