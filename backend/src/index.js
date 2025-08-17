@@ -11,7 +11,7 @@ dotenv.config({
 const app = express();
 const server = createServer(app);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://tiktalk-gamma.vercel.app/';
 const PORT = process.env.PORT || 8000;
 
 // Allow multiple origins for development and production
