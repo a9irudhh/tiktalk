@@ -11,22 +11,17 @@ dotenv.config({
 const app = express();
 const server = createServer(app);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://tiktalk-gamma.vercel.app';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const PORT = process.env.PORT || 8000;
 
 // Allow multiple origins for development and production
 const allowedOrigins = [
     'http://localhost:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'https://tiktalk-gamma.vercel.app',
-    'https://tiktalk-gamma.vercel.app/',
     FRONTEND_URL,
     FRONTEND_URL.endsWith('/') ? FRONTEND_URL.slice(0, -1) : FRONTEND_URL + '/'
 ].filter((origin, index, self) => origin && self.indexOf(origin) === index);
 
-console.log('Allowed CORS origins:', allowedOrigins);
+// console.log('Allowed CORS origins:', allowedOrigins);
 
 const io = new Server(server, {
     cors: {
@@ -69,6 +64,83 @@ app.use(express.static('public'));
 
 let allSockets = [];
 
+// Helper function to clean up empty rooms and optimize data structure
+const cleanupEmptyRooms = () => {
+    console.log('Starting room cleanup...');
+    
+    // Remove stale socket connections that might be disconnected
+    const validSockets = allSockets.filter(user => {
+        if (user.socket && user.socket.connected) {
+            return true;
+        } else {
+            console.log(`Removing stale connection for user: ${user.name} in room: ${user.room}`);
+            return false;
+        }
+    });
+    
+    // Update allSockets with only valid connections
+    const removedCount = allSockets.length - validSockets.length;
+    allSockets = validSockets;
+    
+    if (removedCount > 0) {
+        console.log(`Removed ${removedCount} stale connections`);
+    }
+    
+    const activeRooms = new Set();
+    
+    // Collect all active rooms
+    allSockets.forEach(user => {
+        if (user.room) {
+            activeRooms.add(user.room);
+        }
+    });
+    
+    // Get all Socket.IO rooms (excluding default socket rooms)
+    const allSocketRooms = new Set();
+    io.sockets.adapter.rooms.forEach((sockets, roomName) => {
+        // Skip rooms that are just socket IDs (default rooms)
+        if (!sockets.has(roomName)) {
+            allSocketRooms.add(roomName);
+        }
+    });
+    
+    // Find empty rooms to clean up
+    const emptyRooms = [];
+    allSocketRooms.forEach(roomName => {
+        if (!activeRooms.has(roomName)) {
+            emptyRooms.push(roomName);
+        }
+    });
+    
+    // Clean up empty Socket.IO rooms
+    emptyRooms.forEach(roomName => {
+        io.sockets.adapter.del(roomName);
+        console.log(`Cleaned up empty room: ${roomName}`);
+    });
+    
+    // Log cleanup info
+    const roomCounts = {};
+    allSockets.forEach(user => {
+        if (user.room) {
+            roomCounts[user.room] = (roomCounts[user.room] || 0) + 1;
+        }
+    });
+    
+    console.log('Active rooms:', Object.keys(roomCounts).length);
+    console.log('Room participants:', roomCounts);
+    console.log('Total connections:', allSockets.length);
+    
+    if (emptyRooms.length > 0) {
+        console.log('Removed empty rooms:', emptyRooms);
+    }
+}
+
+// Periodic cleanup now runs less frequently since we clean up immediately on exit/disconnect
+setInterval(() => {
+    console.log('Running periodic room cleanup (for any edge cases)...');
+    cleanupEmptyRooms();
+}, 60 * 60 * 1000); // Every hour
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     // console.log('A user connected:', socket.id);
@@ -96,11 +168,12 @@ io.on('connection', (socket) => {
                 name: trimmedName
             });
 
-            // console.log(`${trimmedName} joined room ${room}`);
+            console.log(`${trimmedName} joined room ${room}`);
             const roomParticipants = allSockets
                 .filter(user => user.room === room)
                 .map(user => user.name);
 
+            console.log(`Room ${room} now has ${roomParticipants.length} participants: ${roomParticipants.join(', ')}`);
             io.to(room).emit('participants', roomParticipants);
             socket.emit('joinConfirmed', { room, name: trimmedName });
 
@@ -138,18 +211,33 @@ io.on('connection', (socket) => {
     socket.on('exit', (data) => {
         try {
             const { room, name } = data;
+            
+            // Remove user from allSockets
             allSockets = allSockets.filter(user => 
                 !(user.room === room && user.name === name)
             );
 
             // Leave the room
             socket.leave(room);
+            
+            // Check remaining participants in this room
             const roomParticipants = allSockets
                 .filter(user => user.room === room)
                 .map(user => user.name);
 
-            io.to(room).emit('participants', roomParticipants);
-            // console.log(`${name} left room ${room}`);
+            // If room is now empty, clean it up immediately
+            if (roomParticipants.length === 0) {
+                console.log(`Room ${room} is now empty, cleaning up...`);
+                // Remove the room from Socket.IO adapter
+                io.sockets.adapter.del(room);
+                console.log(`Deleted empty room: ${room}`);
+            } else {
+                // Notify remaining participants about updated participant list
+                io.to(room).emit('participants', roomParticipants);
+                console.log(`Room ${room} now has ${roomParticipants.length} participants: ${roomParticipants.join(', ')}`);
+            }
+
+            console.log(`${name} left room ${room}`);
 
         } catch (error) {
             console.log('Error in exit event:', error);
@@ -192,14 +280,28 @@ io.on('connection', (socket) => {
             
             if (disconnectedUser) {
                 const { room, name } = disconnectedUser;
+                
+                // Remove user from allSockets
                 allSockets = allSockets.filter(user => user.socketId !== socket.id);
 
+                // Check remaining participants in this room
                 const roomParticipants = allSockets
                     .filter(user => user.room === room)
                     .map(user => user.name);
-                io.to(room).emit('participants', roomParticipants);
 
-                // console.log(`${name} disconnected from room ${room}`);
+                // If room is now empty, clean it up immediately
+                if (roomParticipants.length === 0) {
+                    console.log(`Room ${room} is now empty after disconnect, cleaning up...`);
+                    // Remove the room from Socket.IO adapter
+                    io.sockets.adapter.del(room);
+                    console.log(`Deleted empty room: ${room}`);
+                } else {
+                    // Notify remaining participants about updated participant list
+                    io.to(room).emit('participants', roomParticipants);
+                    console.log(`Room ${room} now has ${roomParticipants.length} participants after disconnect: ${roomParticipants.join(', ')}`);
+                }
+
+                console.log(`${name} disconnected from room ${room}`);
             }
         } catch (error) {
             console.log('Error in disconnect event:', error);
@@ -207,9 +309,41 @@ io.on('connection', (socket) => {
     });
 });
 
+// Helper function to get room statistics
+const getRoomStats = () => {
+    const roomCounts = {};
+    const totalUsers = allSockets.length;
+    
+    allSockets.forEach(user => {
+        if (user.room) {
+            roomCounts[user.room] = (roomCounts[user.room] || 0) + 1;
+        }
+    });
+    
+    const totalRooms = Object.keys(roomCounts).length;
+    const averageUsersPerRoom = totalRooms > 0 ? (totalUsers / totalRooms).toFixed(2) : 0;
+    
+    return {
+        totalUsers,
+        totalRooms,
+        averageUsersPerRoom,
+        roomCounts,
+        timestamp: new Date().toISOString()
+    };
+}
+
 // health check
 app.get('/', (req, res) => {
     res.json({ message: 'TikTalk Socket.IO Chat Server is running!' });
+});
+
+// Room statistics endpoint
+app.get('/stats', (req, res) => {
+    const stats = getRoomStats();
+    res.json({
+        message: 'TikTalk Server Statistics',
+        ...stats
+    });
 });
 
 // Start server without MongoDB for now
