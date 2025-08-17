@@ -11,6 +11,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './comp
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog'
 import { ThemeProvider } from './components/theme-provider'
 import { ModeToggle } from './components/mode-toggle'
+import { LoadingSteps } from './components/LoadingSteps'
+import { LoadingButton } from './components/LoadingButton'
+import { SuccessAnimation } from './components/SuccessAnimation'
 import { MessageCircle, Users, Send, ArrowLeft, Plus, LogIn, Hash, Sparkles, Copy, Check, AlertTriangle } from 'lucide-react'
 import './index.css'
 
@@ -30,6 +33,10 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [showParticipants, setShowParticipants] = useState(false)
   const [showLeaveDialog, setShowLeaveDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingType, setLoadingType] = useState<'creating' | 'joining' | null>(null)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -43,12 +50,23 @@ function App() {
     setSocket(newSocket)
 
     newSocket.on('joinConfirmed', () => {
-      setCurrentPage('chat')
-      setError('')
+      // Show success animation first
+      setIsLoading(false)
+      setShowSuccess(true)
+      
+      // Then transition to chat after a brief delay
+      setTimeout(() => {
+        setCurrentPage('chat')
+        setError('')
+        setShowSuccess(false)
+        setLoadingType(null)
+      }, 1500)
     })
 
     newSocket.on('error', (data) => {
       setError(data.message || 'An error occurred')
+      setIsLoading(false)
+      setLoadingType(null)
     })
 
     newSocket.on('participants', (participants) => {
@@ -81,6 +99,10 @@ function App() {
       return
     }
 
+    setError('')
+    setIsLoading(true)
+    setLoadingType('joining')
+    
     const newSocket = connectSocket()
     newSocket.emit('join', { room: roomNumber, name: username })
   }
@@ -91,6 +113,10 @@ function App() {
       return
     }
 
+    setError('')
+    setIsLoading(true)
+    setLoadingType('creating')
+
     const newRoomNumber = Math.floor(100000 + Math.random() * 900000).toString()
     setRoomNumber(newRoomNumber)
     
@@ -99,13 +125,20 @@ function App() {
   }
 
   const sendMessage = () => {
-    if (!message.trim() || !socket) return
+    if (!message.trim() || !socket || isSending) return
+    
+    setIsSending(true)
     
     socket.emit('chat', {
       message: message.trim(),
       name: username
     })
     setMessage('')
+    
+    // Reset sending state after a brief delay
+    setTimeout(() => {
+      setIsSending(false)
+    }, 300)
   }
 
   const handleTyping = () => {
@@ -138,6 +171,10 @@ function App() {
     setError('')
     setShowParticipants(false)
     setShowLeaveDialog(false)
+    setIsLoading(false)
+    setLoadingType(null)
+    setShowSuccess(false)
+    setIsSending(false)
   }
 
   const copyRoomNumber = () => {
@@ -158,6 +195,24 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="tiktalk-theme">
       <TooltipProvider>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-2 lg:p-4 flex flex-col">
+          {/* Loading overlay */}
+          {isLoading && loadingType && (
+            <LoadingSteps 
+              type={loadingType} 
+              username={username}
+              roomNumber={loadingType === 'joining' ? roomNumber : undefined}
+            />
+          )}
+
+          {/* Success overlay */}
+          {showSuccess && loadingType && (
+            <SuccessAnimation 
+              type={loadingType === 'creating' ? 'created' : 'joined'}
+              username={username}
+              roomNumber={roomNumber}
+            />
+          )}
+          
           <div className="max-w-8xl mx-auto w-full flex-1 flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between mb-4 lg:mb-6">
@@ -224,10 +279,16 @@ function App() {
                             {error}
                           </div>
                         )}
-                        <Button onClick={createRoom} className="w-full" size="lg">
+                        <LoadingButton 
+                          onClick={createRoom} 
+                          className="w-full" 
+                          size="lg"
+                          loading={isLoading && loadingType === 'creating'}
+                          loadingText="Creating..."
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Room
-                        </Button>
+                        </LoadingButton>
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -268,10 +329,16 @@ function App() {
                             {error}
                           </div>
                         )}
-                        <Button onClick={joinRoom} className="w-full" size="lg">
+                        <LoadingButton 
+                          onClick={joinRoom} 
+                          className="w-full" 
+                          size="lg"
+                          loading={isLoading && loadingType === 'joining'}
+                          loadingText="Joining..."
+                        >
                           <LogIn className="w-4 h-4 mr-2" />
                           Join Room
-                        </Button>
+                        </LoadingButton>
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -515,12 +582,18 @@ function App() {
                             setMessage(e.target.value)
                             handleTyping()
                           }}
-                          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                          onKeyPress={(e) => e.key === 'Enter' && !isSending && sendMessage()}
                           className="flex-1 bg-background h-12 text-base px-4 resize-none"
                         />
-                        <Button onClick={sendMessage} size="lg" className="px-6 h-12 flex-shrink-0">
+                        <LoadingButton 
+                          onClick={sendMessage} 
+                          size="lg" 
+                          className="px-6 h-12 flex-shrink-0"
+                          loading={isSending}
+                          disabled={!message.trim()}
+                        >
                           <Send className="w-5 h-5" />
-                        </Button>
+                        </LoadingButton>
                       </div>
                     </div>
                   </Card>
