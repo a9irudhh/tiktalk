@@ -1,16 +1,13 @@
 ## 💬 TikTalk - Anonymous Real-time Chat Application
 
-<div align="center">
-  <img src="./frontend/vite-project/public/favicon.png" alt="TikTalk Logo" width="64" height="64">
-  
+
   **A modern, anonymous real-time chat application built with React and Socket.IO**
   
   [![Made by](https://img.shields.io/badge/Made%20by-Anirudh%20R%20H-blue)](https://github.com/a9irudhh)
   [![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
   [![React](https://img.shields.io/badge/React-19.1.1-61DAFB.svg)](https://reactjs.org/)
   [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8.1-010101.svg)](https://socket.io/)
-</div>
-
+  
 ## 🌟 Features
 
 - **🚀 Anonymous messaging** - Instant communication without revealing identity
