@@ -155,7 +155,7 @@ io.on('connection', (socket) => {
             );
             
             if (existingUser) {
-                socket.emit('error', { message: 'You are already in the room with this name' });
+                socket.emit('error', { message: 'Person already in the room with this name' });
                 // console.log(`${trimmedName} attempted to join room ${room} but name already exists`);
                 return;
             }

@@ -95,7 +95,7 @@ function App() {
 
   const joinRoom = () => {
     if (!roomNumber.trim() || !username.trim()) {
-      setError('Please enter both room number and username')
+      setError('Please enter both room code and anonymous name')
       return
     }
 
@@ -109,7 +109,7 @@ function App() {
 
   const createRoom = () => {
     if (!username.trim()) {
-      setError('Please enter a username')
+      setError('Please enter an anonymous name')
       return
     }
 
@@ -224,7 +224,7 @@ function App() {
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     TikTalk
                   </h1>
-                  <p className="text-sm text-muted-foreground">Real-time chat rooms</p>
+                  <p className="text-sm text-muted-foreground">Anonymous chat rooms</p>
                 </div>
               </div>
               <ModeToggle />
@@ -236,7 +236,7 @@ function App() {
                 <div className="text-center space-y-4">
                   <h2 className="text-3xl font-bold">Welcome to TikTalk</h2>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    Create or join chat rooms for real-time conversations with friends and colleagues.
+                    Join anonymous chat rooms for private conversations without revealing your identity.
                   </p>
                 </div>
 
@@ -257,18 +257,18 @@ function App() {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                           <Sparkles className="w-5 h-5 text-blue-500" />
-                          Create New Room
+                          Create Anonymous Room
                         </CardTitle>
                         <CardDescription>
-                          Start a new chat room and invite others to join
+                          Start a new anonymous chat room and share the room code
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="create-username">Your Name</Label>
+                          <Label htmlFor="create-username">Anonymous Name</Label>
                           <Input
                             id="create-username"
-                            placeholder="Enter your name"
+                            placeholder="Enter your anonymous name"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && createRoom()}
@@ -287,7 +287,7 @@ function App() {
                           loadingText="Creating..."
                         >
                           <Plus className="w-4 h-4 mr-2" />
-                          Create Room
+                          Create Anonymous Room
                         </LoadingButton>
                       </CardContent>
                     </Card>
@@ -298,27 +298,27 @@ function App() {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                           <Hash className="w-5 h-5 text-green-500" />
-                          Join Existing Room
+                          Join Anonymous Room
                         </CardTitle>
                         <CardDescription>
-                          Enter a room number to join an existing conversation
+                          Enter a room code to join an anonymous conversation
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="join-room">Room Number</Label>
+                          <Label htmlFor="join-room">Room Code</Label>
                           <Input
                             id="join-room"
-                            placeholder="Enter room number"
+                            placeholder="Enter room code"
                             value={roomNumber}
                             onChange={(e) => setRoomNumber(e.target.value)}
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="join-username">Your Name</Label>
+                          <Label htmlFor="join-username">Anonymous Name</Label>
                           <Input
                             id="join-username"
-                            placeholder="Enter your name"
+                            placeholder="Enter your anonymous name"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && joinRoom()}
@@ -364,7 +364,7 @@ function App() {
                       <CardHeader className="px-4 py-3 border-b flex flex-row items-center justify-between lg:justify-start">
                         <CardTitle className="flex items-center gap-3 text-base">
                           <Users className="w-4 h-4 text-green-500" />
-                          Online ({participants.length})
+                          Anonymous Users ({participants.length})
                         </CardTitle>
                         <Button
                           variant="ghost"
@@ -431,7 +431,7 @@ function App() {
                                   Leave Room?
                                 </DialogTitle>
                                 <DialogDescription>
-                                  Are you sure you want to leave the chat room? You'll need the room number to rejoin.
+                                  Are you sure you want to leave the anonymous chat room? You'll need the room code to rejoin.
                                 </DialogDescription>
                               </DialogHeader>
                               <DialogFooter className="gap-2 sm:gap-0">
@@ -453,7 +453,7 @@ function App() {
                           <div>
                             <CardTitle className="flex items-center gap-3 text-xl">
                               <Hash className="w-5 h-5 text-blue-500" />
-                              Room {roomNumber}
+                              Anonymous Room {roomNumber}
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
@@ -470,12 +470,12 @@ function App() {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>{copied ? 'Copied!' : 'Copy room number'}</p>
+                                  <p>{copied ? 'Copied!' : 'Copy room code'}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </CardTitle>
                             <CardDescription className="text-base mt-1">
-                              {participants.length} participant{participants.length !== 1 ? 's' : ''} online
+                              {participants.length} anonymous user{participants.length !== 1 ? 's' : ''} online
                             </CardDescription>
                           </div>
                         </div>
@@ -576,7 +576,7 @@ function App() {
                     <div className="px-4 py-4 border-t bg-muted/30 flex-shrink-0 mobile-chat-input">
                       <div className="flex gap-3 w-full">
                         <Input
-                          placeholder="Type your message..."
+                          placeholder="Type your anonymous message..."
                           value={message}
                           onChange={(e) => {
                             setMessage(e.target.value)

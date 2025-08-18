@@ -21,7 +21,7 @@ export function SuccessAnimation({ type, username, roomNumber }: SuccessAnimatio
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold text-green-600">Success!</h3>
                 <p className="text-muted-foreground">
-                  {type === "created" ? "Room created successfully" : "Joined room successfully"}
+                  {type === "created" ? "Anonymous room created successfully" : "Joined anonymous room successfully"}
                 </p>
               </div>
             </div>
@@ -30,7 +30,7 @@ export function SuccessAnimation({ type, username, roomNumber }: SuccessAnimatio
             <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg space-y-2">
               <div className="flex items-center justify-center gap-2">
                 <Users className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium">Welcome to Room</span>
+                <span className="text-sm font-medium">Welcome to Anonymous Room</span>
               </div>
               <p className="text-2xl font-mono font-bold text-green-600">{roomNumber}</p>
               <p className="text-sm text-muted-foreground">
@@ -40,7 +40,7 @@ export function SuccessAnimation({ type, username, roomNumber }: SuccessAnimatio
 
             {/* Redirect message */}
             <p className="text-xs text-muted-foreground animate-pulse">
-              Taking you to the chat room...
+              Taking you to the anonymous chat room...
             </p>
           </div>
         </CardContent>

@@ -15,25 +15,25 @@ export function LoadingSteps({ type, username, roomNumber }: LoadingStepsProps) 
   const steps = [
     {
       id: 1,
-      label: type === "creating" ? "Creating room..." : "Finding room...",
+      label: type === "creating" ? "Creating anonymous room..." : "Finding anonymous room...",
       icon: MessageCircle,
       delay: 0
     },
     {
       id: 2,
-      label: "Connecting to server...",
+      label: "Connecting securely...",
       icon: Wifi,
       delay: 800
     },
     {
       id: 3,
-      label: type === "creating" ? "Setting up room..." : "Joining conversation...",
+      label: type === "creating" ? "Setting up anonymous space..." : "Joining anonymous conversation...",
       icon: Users,
       delay: 1600
     },
     {
       id: 4,
-      label: "Almost ready...",
+      label: "Anonymous chat ready...",
       icon: CheckCircle,
       delay: 2200
     }
@@ -58,12 +58,12 @@ export function LoadingSteps({ type, username, roomNumber }: LoadingStepsProps) 
                 <MessageCircle className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold">
-                {type === "creating" ? "Creating Room" : "Joining Room"}
+                {type === "creating" ? "Creating Anonymous Room" : "Joining Anonymous Room"}
               </h3>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>Welcome, <span className="font-medium text-blue-600">{username}</span>!</p>
                 {roomNumber && (
-                  <p>Room: <span className="font-mono bg-muted px-2 py-1 rounded text-purple-600">{roomNumber}</span></p>
+                  <p>Room Code: <span className="font-mono bg-muted px-2 py-1 rounded text-purple-600">{roomNumber}</span></p>
                 )}
               </div>
             </div>
