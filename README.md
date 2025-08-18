@@ -1,4 +1,4 @@
-## 💬 TikTalk - Anonymous Real-time Chat Application 💬 TikTalk - Real-time Chat Application
+## 💬 TikTalk - Anonymous Real-time Chat Application
 
 <div align="center">
   <img src="./frontend/vite-project/public/favicon.png" alt="TikTalk Logo" width="64" height="64">
