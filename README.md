@@ -95,24 +95,6 @@
 
 3. **Open your browser** and navigate to `http://localhost:3000`
 
-## 🌐 Deployment
-
-### Backend Deployment (Render)
-1. Create a new web service on [Render](https://render.com)
-2. Connect your GitHub repository
-3. Set build command: `cd backend && npm install`
-4. Set start command: `cd backend && npm start`
-5. Add environment variables:
-   - `FRONTEND_URL`: Your frontend deployment URL
-   - `PORT`: 8000 (or leave default)
-
-### Frontend Deployment (Vercel)
-1. Create a new project on [Vercel](https://vercel.com)
-2. Connect your GitHub repository
-3. Set framework preset to "Vite"
-4. Set root directory to `frontend/vite-project`
-5. Add environment variable:
-   - `VITE_BACKEND_URL`: Your backend deployment URL
 
 ## 📁 Project Structure
 
@@ -148,21 +130,6 @@ tiktalk/
 │   └── texting.png
 ├── LICENSE
 └── README.md
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-#### Backend (.env)
-```env
-FRONTEND_URL=http://localhost:3000
-PORT=8000
-```
-
-#### Frontend (.env)
-```env
-VITE_BACKEND_URL=http://localhost:8000
 ```
 
 ## 🎯 Key Features Explained
